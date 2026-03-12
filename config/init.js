@@ -31,6 +31,7 @@ export async function startDataBase() {
         question_id INT NOT NULL,
         user_id VARCHAR(100) NOT NULL,
         answer TEXT NOT NULL,
+        vote int, 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (question_id) REFERENCES questions(id),
         FOREIGN KEY (user_id) REFERENCES user(id)
