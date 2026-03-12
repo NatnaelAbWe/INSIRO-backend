@@ -43,5 +43,3 @@ export async function startDataBase() {
     console.log("Database connection unsuccessful\n", err);
   }
 }
-
-startDataBase();
