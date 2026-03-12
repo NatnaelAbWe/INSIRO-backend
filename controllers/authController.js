@@ -73,7 +73,7 @@ export const register = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
     const [rows] = await db.execute("SELECT * from user WHERE email= ?", [
-      email,
+      normalizedEmail,
     ]);
 
     if (rows.length != 0) {
@@ -85,7 +85,7 @@ export const register = async (req, res) => {
 
     await db.execute(
       "INSERT INTO user (id, name, password, username, email) VALUES (?,?,?,?,?)",
-      [userId, name, hashedPassword, normalizedEmail, userName],
+      [userId, name, hashedPassword, userName, normalizedEmail],
     );
 
     return res.status(201).json({ message: "user successfully created" });
