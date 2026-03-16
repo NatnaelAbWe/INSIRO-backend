@@ -1,47 +1,52 @@
 import { db } from "../config/db.js";
-import jwt from "jsonwebtoken";
 
 export const askQuestion = async (req, res) => {
-  const { title, question, token } = req.body;
+  const { title, question } = req.body;
 
   try {
-    if (!token || !title || !question) {
+    if (!title || !question) {
       return res.status(400).json({
         message:
-          "either the token, title or question is missing from the provided information",
+          "either the title or question is missing from the provided information",
       });
     }
 
-    if (title.length > 255) {
+    const cleanTitle = title.trim();
+    const cleanQuestion = question.trim();
+
+    if (cleanTitle.length > 255) {
       return res
         .status(400)
         .json({ message: "the title can not be more than 255 chars" });
     }
 
-    if (question.length > 5000) {
+    if (cleanTitle.length == 0) {
+      return res
+        .status(400)
+        .json({ message: "TITLE CAN NOT BE EMPTY AFTER TRIMMING" });
+    }
+
+    if (cleanQuestion.length > 5000) {
       return res
         .status(400)
         .json({ message: "maximum question character limit passed" });
     }
 
-    const decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const userId = decode.userId;
+    if (cleanQuestion.length == 0) {
+      return res
+        .status(200)
+        .json({ message: "QUESTION CAN NOT BE EMPTY AFTER TRIMMING" });
+    }
 
-    const cleanTitle = title.trim();
-    const cleanQuestion = question.trim();
+    const userId = req.user.userId;
 
     await db.execute(
       "INSERT INTO questions(user_id, title, question) VALUES (?,?,?)",
       [userId, cleanTitle, cleanQuestion],
     );
-    res
-      .status(201)
-      .json({ message: "question sumbitted sueccessfully sucessfull" });
+    res.status(201).json({ message: "Question sumbitted sueccessfully" });
   } catch (err) {
-    console.log(err);
-    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "UNAUTORIZED USER" });
-    }
+    console.log("AskQuestion Error: ", err);
     res.status(500).json({ message: "INTERNAL SERVER ERROR" });
   }
 };
