@@ -60,3 +60,22 @@ export const askQuestion = async (req, res) => {
     res.status(500).json({ message: "INTERNAL SERVER ERROR" });
   }
 };
+
+export const getAllQuestions = async (req, res) => {
+  try {
+    const [questions] = await db.execute(`SELECT 
+    questions.id, 
+    questions.title, 
+    questions.question, 
+    user.username 
+FROM questions 
+INNER JOIN user ON questions.user_id = user.id ORDER BY questions.id DESC`);
+
+    return res
+      .status(200)
+      .json({ message: "questions sucessfully retritrived", data: questions });
+  } catch (error) {
+    console.error("error from getAlllQuestions: ", error);
+    return res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+  }
+};

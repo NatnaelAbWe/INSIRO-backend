@@ -2,6 +2,7 @@ import express from "express";
 import { askQuestion } from "../controllers/questionController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { rateLimit } from "express-rate-limit";
+import { getAllQuestions } from "../controllers/questionController.js";
 
 const questionLimiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,
@@ -15,5 +16,6 @@ const questionLimiter = rateLimit({
 const router = express.Router();
 
 router.post("/ask", authMiddleware, questionLimiter, askQuestion);
+router.get("/all", getAllQuestions);
 
 export default router;
