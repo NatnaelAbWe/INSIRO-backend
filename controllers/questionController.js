@@ -104,3 +104,69 @@ export const fetchSpacificQuestion = async (req, res) => {
     return res.status(500).json({ message: "INTERNAL SEVER ERROR" });
   }
 };
+
+export const editQuestion = async (req, res) => {
+  const { questionId } = req.params;
+  const { title, question } = req.body;
+  const userId = req.user.userId;
+
+  try {
+    const [rows] = await db.execute(
+      "SELECT user_id FROM questions WHERE id = ?",
+      [questionId],
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    if (rows[0].user_id !== userId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to edit this question" });
+    }
+
+    await db.execute(
+      "UPDATE questions SET title = ?, question = ? WHERE id = ?",
+      [title, question, questionId],
+    );
+
+    return res.status(200).json({ message: "Question updated successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+  }
+};
+
+export const deleteQuestion = async (req, res) => {
+  const { questionId } = req.params;
+  const userId = req.user.userId;
+
+  try {
+    const [rows] = await db.execute(
+      "SELECT user_id FROM questions WHERE id = ?",
+      [questionId],
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    if (rows[0].user_id !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to delete this question" });
+    }
+
+    await db.execute("DELETE FROM answers WHERE question_id = ?", [questionId]);
+
+    await db.execute("DELETE FROM questions WHERE id = ?", [questionId]);
+
+    return res
+      .status(200)
+      .json({ message: "Question and its answers deleted successfully" });
+  } catch (err) {
+    console.error("Error in deleteQuestion: ", err);
+    return res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+  }
+};
