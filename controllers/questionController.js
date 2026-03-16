@@ -2,8 +2,20 @@ import { db } from "../config/db.js";
 
 export const askQuestion = async (req, res) => {
   const { title, question } = req.body;
+  const userId = req.user.userId;
 
   try {
+    const [rows] = await db.execute(
+      "SELECT COUNT(*) as count FROM questions WHERE user_id = ? AND created_at > NOW() - INTERVAL 1 DAY",
+      [userId],
+    );
+
+    if (rows[0].count > 2) {
+      return res.status(429).json({
+        message: "you have reached the daily limit of 2 questions per account",
+      });
+    }
+
     if (!title || !question) {
       return res.status(400).json({
         message:
@@ -37,8 +49,6 @@ export const askQuestion = async (req, res) => {
         .status(200)
         .json({ message: "QUESTION CAN NOT BE EMPTY AFTER TRIMMING" });
     }
-
-    const userId = req.user.userId;
 
     await db.execute(
       "INSERT INTO questions(user_id, title, question) VALUES (?,?,?)",
