@@ -4,6 +4,7 @@ import cors from "cors";
 import { startDataBase } from "./config/init.js";
 import authRoute from "./routes/authRoutes.js";
 import questionRoute from "./routes/questionRoute.js";
+import answerRoute from "./routes/answerRoute.js";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ await connectDb();
 
 server.use("/api/auth", authRoute);
 server.use("/api/question", questionRoute);
+server.use("/api/answer", answerRoute);
 
 server.listen(port, () => {
   console.log("your server is up and running on port:", port);
