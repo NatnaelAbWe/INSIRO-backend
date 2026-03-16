@@ -79,3 +79,28 @@ INNER JOIN user ON questions.user_id = user.id ORDER BY questions.id DESC`);
     return res.status(500).json({ message: "INTERNAL SERVER ERROR" });
   }
 };
+
+export const fetchSpacificQuestion = async (req, res) => {
+  const { questionId } = req.params;
+
+  try {
+    const [questionWithId] = await db.execute(
+      `SELECT * FROM questions INNER JOIN user ON questions.user_id = user.id WHERE questions.id = ?`,
+      [questionId],
+    );
+
+    if (questionId.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "NO QUESTION FOUND WITH THIS ID" });
+    }
+
+    return res.status(200).json({
+      message: "question retrived sucessfully",
+      question: questionWithId,
+    });
+  } catch (err) {
+    console.error("error from the fetch spacific question: ", err);
+    return res.status(500).json({ message: "INTERNAL SEVER ERROR" });
+  }
+};
